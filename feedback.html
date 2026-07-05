@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index, follow">
+<title>AnyPitch — Send Feedback</title>
+<meta name="description" content="Send anonymous feedback or a bug report to the AnyPitch developer. No account, no email needed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#070810; --bg1:#0d1020;
+    --card:rgba(255,255,255,.045);
+    --card-border:rgba(255,255,255,.10);
+    --text:#eceefb; --muted:#9aa2c2; --faint:#6b7299;
+    --peri:#8b9cff; --violet:#a78bff; --cyan:#6ee7f9;
+    --good:#7ef0b2; --bad:#ff8fa3;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; min-height:100vh; color:var(--text);
+    font-family:"Geist","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-weight:400; line-height:1.65; letter-spacing:.1px;
+    background:
+      radial-gradient(1100px 700px at 12% -8%, rgba(139,156,255,.16), transparent 60%),
+      radial-gradient(900px 640px at 92% 4%, rgba(110,231,249,.12), transparent 60%),
+      radial-gradient(900px 900px at 50% 120%, rgba(167,139,255,.14), transparent 60%),
+      linear-gradient(180deg,var(--bg1),var(--bg0) 60%);
+    background-attachment:fixed;
+    padding:clamp(20px,5vw,64px) 18px 72px;
+    overflow-x:hidden;
+  }
+  /* drifting aurora orbs behind the glass */
+  .orbs{position:fixed;inset:0;z-index:-1;pointer-events:none;filter:blur(60px);opacity:.55}
+  .orb{position:absolute;border-radius:50%;will-change:transform}
+  .orb.a{width:420px;height:420px;left:-120px;top:8%;
+    background:radial-gradient(circle at 35% 35%, rgba(139,156,255,.55), transparent 70%);
+    animation:driftA 26s ease-in-out infinite alternate}
+  .orb.b{width:360px;height:360px;right:-100px;top:30%;
+    background:radial-gradient(circle at 60% 40%, rgba(110,231,249,.45), transparent 70%);
+    animation:driftB 31s ease-in-out infinite alternate}
+  .orb.c{width:480px;height:480px;left:30%;bottom:-180px;
+    background:radial-gradient(circle at 50% 50%, rgba(167,139,255,.42), transparent 70%);
+    animation:driftC 37s ease-in-out infinite alternate}
+  @keyframes driftA{from{transform:translate(0,0) scale(1)}to{transform:translate(70px,40px) scale(1.12)}}
+  @keyframes driftB{from{transform:translate(0,0) scale(1.05)}to{transform:translate(-60px,60px) scale(.95)}}
+  @keyframes driftC{from{transform:translate(0,0) scale(1)}to{transform:translate(50px,-50px) scale(1.08)}}
+  @media (prefers-reduced-motion: reduce){.orb{animation:none}}
+
+  .wrap{max-width:640px;margin:0 auto}
+  header{text-align:center;margin:8px 0 34px}
+  .mark{
+    font-weight:800;font-size:clamp(34px,7vw,52px);letter-spacing:-.5px;line-height:1.05;
+    background:linear-gradient(100deg,var(--peri),var(--violet) 45%,var(--cyan));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 30px rgba(139,156,255,.28));
+  }
+  .kicker{margin-top:10px;color:var(--muted);font-size:14px;font-weight:500;
+    text-transform:uppercase;letter-spacing:2.4px}
+
+  /* liquid glass card with gradient border */
+  .card{
+    position:relative;
+    background:var(--card);border-radius:26px;
+    padding:clamp(22px,4.5vw,40px);
+    backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
+    border:1px solid transparent;
+    background-clip:padding-box;
+  }
+  .card::before{
+    content:"";position:absolute;inset:-1px;border-radius:27px;z-index:-1;
+    background:linear-gradient(135deg, rgba(139,156,255,.45), rgba(255,255,255,.07) 30%,
+      rgba(255,255,255,.05) 70%, rgba(110,231,249,.4));
+  }
+  h1{font-size:clamp(22px,4vw,28px);font-weight:700;margin:0 0 6px;letter-spacing:-.3px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 24px;line-height:1.6}
+
+  label{display:block;font-size:13px;font-weight:600;color:#cfd4ee;margin:0 0 7px;letter-spacing:.3px}
+  .optional{color:var(--faint);font-weight:500}
+  textarea,input[type=email]{
+    width:100%;color:var(--text);font-family:inherit;font-size:15px;line-height:1.55;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.12);border-radius:16px;
+    padding:14px 16px;outline:none;resize:vertical;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  textarea{min-height:150px}
+  textarea::placeholder,input::placeholder{color:var(--faint)}
+  textarea:focus,input[type=email]:focus{
+    border-color:rgba(139,156,255,.65);
+    box-shadow:0 0 0 3px rgba(139,156,255,.15), 0 0 24px rgba(139,156,255,.12);
+    background:rgba(255,255,255,.07);
+  }
+  .field{margin-bottom:18px}
+  .hp{position:absolute;left:-9999px;opacity:0;pointer-events:none}
+
+  /* submit button with traveling border shimmer */
+  .btnwrap{
+    position:relative;border-radius:18px;padding:1.5px;overflow:hidden;margin-top:6px;
+    background:rgba(255,255,255,.14); /* faint static ring; the glint travels on top of it */
+  }
+  /* the glint layer must be a CENTERED SQUARE bigger than the wrap's diagonal —
+     rotating a non-square layer makes the sweep wobble and vanish at the ends */
+  .btnwrap::before{
+    content:"";position:absolute;left:50%;top:50%;
+    width:200%;aspect-ratio:1/1;
+    transform:translate(-50%,-50%) rotate(0turn);
+    background:conic-gradient(from 0deg, transparent 0 40%, var(--cyan) 47%, var(--peri) 53%, transparent 60% 100%);
+    animation:spin 3.6s linear infinite;
+  }
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(1turn)}}
+  @media (prefers-reduced-motion: reduce){.btnwrap::before{animation:none;background:linear-gradient(135deg,var(--peri),var(--cyan))}}
+  button.send{
+    position:relative;width:100%;border:none;cursor:pointer;border-radius:17px;
+    font-family:inherit;font-weight:700;font-size:16px;letter-spacing:.3px;color:#0a0c18;
+    padding:15px 18px;
+    background:linear-gradient(120deg,var(--peri),var(--violet) 50%,var(--cyan));
+    box-shadow:0 10px 34px -10px rgba(139,156,255,.55);
+    transition:transform .15s, filter .2s, opacity .2s;
+  }
+  button.send:hover{filter:brightness(1.08)}
+  button.send:active{transform:scale(.985)}
+  button.send:disabled{opacity:.55;cursor:default;filter:none}
+
+  .note{margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.6}
+  .note a{color:var(--cyan);text-decoration:none;border-bottom:1px solid rgba(110,231,249,.35)}
+
+  .status{display:none;margin-top:16px;padding:14px 16px;border-radius:14px;font-size:14px;line-height:1.55}
+  .status.ok{display:block;background:rgba(126,240,178,.10);border:1px solid rgba(126,240,178,.3);color:var(--good)}
+  .status.err{display:block;background:rgba(255,143,163,.10);border:1px solid rgba(255,143,163,.3);color:var(--bad)}
+
+  footer{max-width:640px;margin:26px auto 0;text-align:center;color:var(--muted);font-size:13px}
+  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid rgba(154,162,194,.3)}
+  .sep{margin:0 8px;opacity:.5}
+</style>
+</head>
+<body>
+  <div class="orbs" aria-hidden="true">
+    <div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div class="mark">AnyPitch</div>
+      <div class="kicker">Send Feedback</div>
+    </header>
+
+    <main class="card">
+      <h1>Tell us what you think</h1>
+      <p class="sub">Found a bug? Wish for a feature? This goes straight to the developer.
+      It is <strong style="color:#fff">anonymous</strong>: no account, no email needed.</p>
+
+      <form id="fbform" novalidate>
+        <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
+
+        <div class="field">
+          <label for="msg">Your message</label>
+          <textarea id="msg" name="message" maxlength="4000" required
+            placeholder="What works, what does not, what you wish for..."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="mail">Email <span class="optional">(optional, only if you would like a reply)</span></label>
+          <input id="mail" name="email" type="email" maxlength="120" placeholder="you@example.com">
+        </div>
+
+        <div class="btnwrap">
+          <button class="send" id="sendbtn" type="submit">Send feedback</button>
+        </div>
+
+        <div class="status" id="okmsg">Thank you! Your feedback was sent.</div>
+        <div class="status" id="errmsg">Could not send right now. Please try again in a moment, or email
+          <a href="mailto:anypitch.app@proton.me" style="color:inherit">anypitch.app@proton.me</a>.</div>
+      </form>
+
+      <p class="note">Sent through <a href="https://web3forms.com">Web3Forms</a> to the developer&rsquo;s
+      inbox. This page transmits only your message (and your email, if you typed one); like any internet
+      request, the form service also receives standard technical data such as your IP address to deliver
+      it. Please do not include personal information. See the <a href="privacy.html">Privacy Policy</a>.</p>
+    </main>
+
+    <footer>
+      <a href="privacy.html">Privacy Policy</a><span class="sep">·</span>
+      <a href="terms.html">Terms of Use</a>
+    </footer>
+  </div>
+
+<script>
+(function () {
+  var form = document.getElementById('fbform');
+  var btn = document.getElementById('sendbtn');
+  var ok = document.getElementById('okmsg');
+  var err = document.getElementById('errmsg');
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    ok.classList.remove('ok'); ok.className = 'status';
+    err.className = 'status';
+
+    var msg = document.getElementById('msg').value.trim();
+    if (!msg) { document.getElementById('msg').focus(); return; }
+
+    var payload = {
+      access_key: '1fa10ea6-11f8-4aa3-a3c0-6c4a399304e8',
+      subject: 'AnyPitch feedback (web)',
+      from_name: 'AnyPitch website',
+      message: msg,
+      botcheck: form.elements.botcheck.checked
+    };
+    var mail = document.getElementById('mail').value.trim();
+    if (mail) payload.email = mail;
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function (r) { return r.json().catch(function () { return { success: r.ok }; }); })
+    .then(function (data) {
+      if (data && data.success) {
+        ok.className = 'status ok';
+        form.reset();
+        btn.textContent = 'Sent!';
+        setTimeout(function () { btn.textContent = 'Send feedback'; btn.disabled = false; }, 2500);
+      } else { throw new Error('rejected'); }
+    })
+    .catch(function () {
+      err.className = 'status err';
+      btn.textContent = 'Send feedback';
+      btn.disabled = false;
+    });
+  });
+})();
+</script>
+</body>
+</html>
